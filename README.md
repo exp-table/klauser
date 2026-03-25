@@ -70,13 +70,31 @@ Best for: Generating genuinely novel research hypotheses and identifying blind s
 
 ---
 
-### v4 — `v4/recursive-deep-research-v4.md` + `v4/init-research.md`
+### v4 — `v4/`
 
 **Continuous refinement without fixed cycles. Persistent state. Runs indefinitely.**
 
 Builds on v3's structure-first approach but replaces the structured research loop with a fully open-ended iteration architecture and adds a full workspace scaffolding system. This is the only version that survives across conversations and can run unattended.
 
-**Requires setup.** Run `@init-research.md`, give it your topic, and it creates a `research/<topic>/` directory with 10+ templated state files plus `run.md`, `continue.md`, and `loop.md` prompts. Start with `@research/<topic>/run.md`.
+#### Files
+
+| File | Purpose |
+|------|---------|
+| `v4/recursive-deep-research-v4.md` | The protocol prompt |
+| `v4/init-research.md` | Workspace scaffolding — creates the research directory and all state files |
+| `v4/continue-research.md` | Global continuation prompt — auto-discovers the active research session |
+
+#### Usage
+
+```
+Start:     @init-research.md <topic>
+Continue:  @continue-research.md
+Loop:      /loop 30m @continue-research.md
+```
+
+`init-research.md` takes your topic, infers scoping parameters, creates a `research/<topic>/` directory with 10+ templated state files, and immediately begins working (no confirmation prompts, no scoping interview).
+
+`continue-research.md` is a global prompt — it scans `research/` for subdirectories, reads `status.md` from each, picks the most recently active non-complete session, and resumes. If you have multiple active research projects, it asks which one.
 
 #### Generated workspace structure
 
@@ -84,8 +102,6 @@ Builds on v3's structure-first approach but replaces the structured research loo
 research/<topic>/
   PROTOCOL.md          # copy of recursive-deep-research-v4.md
   run.md               # prompt to start research (reads all state, begins working)
-  continue.md          # prompt to continue from where last session stopped
-  loop.md              # instructions for looped/scheduled execution
   status.md            # current progress + handoff notes (updated every stop)
   scope.md             # scoped research questions and boundaries
   basis.md             # primitive basis (structural skeleton)
@@ -104,13 +120,7 @@ research/<topic>/
 
 The model works autonomously — no pausing, no asking permission, no summarizing and waiting. It writes all state to files as it goes. When context runs out, it dumps a `status.md` handoff with progress estimate, what was just completed, and prioritized next steps.
 
-Three ways to run it:
-
-1. **Manual** — `@research/<topic>/run.md` to start, `@research/<topic>/continue.md` to pick up later
-2. **Looping** — `/loop 2m @research/<topic>/continue.md` for automatic continuation every 2 minutes
-3. **Scheduled (unattended)** — `/schedule` for overnight or long-running research on a cron
-
-Each invocation reads state files, works until context limits, writes state, exits. The next invocation picks up from the new state. This means research can run indefinitely across arbitrarily many conversations.
+Each invocation of `continue-research.md` reads state files, works until context limits, writes state, exits. The next invocation picks up from the new state. This means research can run indefinitely across arbitrarily many conversations — manually, in a loop, or on a schedule.
 
 #### Key changes from v3
 
